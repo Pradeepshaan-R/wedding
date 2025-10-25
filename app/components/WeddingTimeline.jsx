@@ -33,8 +33,11 @@ export default function WeddingTimeline() {
   const [scrollY, setScrollY] = useState(0);
 
   useEffect(() => {
+    if (typeof window === "undefined") return; // ✅ Skip during SSR
+
     const handleScroll = () => setScrollY(window.scrollY);
     window.addEventListener("scroll", handleScroll);
+
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 

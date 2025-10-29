@@ -30,48 +30,56 @@ const timeline = [
 ];
 
 export default function WeddingTimeline() {
-  const [scrollY, setScrollY] = useState(0);
+  const [petals, setPetals] = useState([]);
 
   useEffect(() => {
-    if (typeof window === "undefined") return; // ✅ Skip during SSR
+    if (typeof window === "undefined") return;
 
-    const handleScroll = () => setScrollY(window.scrollY);
-    window.addEventListener("scroll", handleScroll);
-
-    return () => window.removeEventListener("scroll", handleScroll);
+    // Generate petals only after window is available
+    const newPetals = Array.from({ length: 10 }).map(() => ({
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
+      scale: Math.random() * 0.8 + 0.3,
+      duration: 6 + Math.random() * 4,
+    }));
+    setPetals(newPetals);
   }, []);
 
   return (
     <section className="relative py-24 px-6 bg-ivory text-burgundy overflow-hidden">
-      {/* Subtle floral background */}
+      {/* Background pattern */}
       <div className="absolute inset-0 opacity-10 bg-[url('/round-floral.png')] bg-center bg-contain bg-no-repeat"></div>
 
       {/* Floating petals */}
-      <div className="absolute inset-0 overflow-hidden">
-        {[...Array(10)].map((_, i) => (
-          <motion.span
-            key={i}
-            className="absolute text-pink-300 opacity-40"
-            initial={{
-              x: Math.random() * window.innerWidth,
-              y: Math.random() * window.innerHeight,
-              scale: Math.random() * 0.8 + 0.3,
-            }}
-            animate={{
-              y: [0, -100, 0],
-              opacity: [0.4, 0.8, 0.4],
-            }}
-            transition={{
-              duration: 6 + Math.random() * 4,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-          >
-            ❀
-          </motion.span>
-        ))}
-      </div>
+      {typeof window !== "undefined" && petals.length > 0 && (
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {petals.map((petal, i) => (
+            <motion.span
+              key={i}
+              className="absolute text-pink-300 opacity-40"
+              initial={{
+                x: petal.x,
+                y: petal.y,
+                scale: petal.scale,
+              }}
+              animate={{
+                y: [petal.y, petal.y - 120, petal.y],
+                opacity: [0.3, 0.7, 0.3],
+              }}
+              transition={{
+                duration: petal.duration,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: Math.random() * 2,
+              }}
+            >
+              ❀
+            </motion.span>
+          ))}
+        </div>
+      )}
 
+      {/* Title */}
       <motion.h2
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -81,7 +89,7 @@ export default function WeddingTimeline() {
         The Wedding Day Timeline
       </motion.h2>
 
-      {/* Central glowing line */}
+      {/* Timeline */}
       <div className="relative max-w-3xl mx-auto before:absolute before:top-0 before:bottom-0 before:left-1/2 before:w-[3px] before:-translate-x-1/2 before:bg-gradient-to-b before:from-burgundy/30 before:to-pink-400/40">
         {timeline.map((event, index) => (
           <motion.div
@@ -97,7 +105,7 @@ export default function WeddingTimeline() {
               index % 2 === 0 ? "md:flex-row-reverse" : ""
             }`}
           >
-            {/* Animated connection glow */}
+            {/* Glowing dot */}
             <motion.div
               className="absolute left-1/2 -translate-x-1/2 w-6 h-6 bg-gradient-to-tr from-burgundy to-pink-300 rounded-full shadow-md shadow-pink-200"
               animate={{
@@ -114,7 +122,7 @@ export default function WeddingTimeline() {
               }}
             ></motion.div>
 
-            {/* Event Card */}
+            {/* Event card */}
             <motion.div
               whileHover={{ scale: 1.03 }}
               transition={{ type: "spring", stiffness: 200 }}
